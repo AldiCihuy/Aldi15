@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aldi Herawan | Digital Enthusiast Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/three@0.132.2/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            scroll-behavior: smooth;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #d1fae5 0%, #e0f2fe 50%, #ede9fe 100%);
+        }
+        
+        .skill-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+            transition: width 1s ease-in-out;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+        
+        .farm-model {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .rotate {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div x-data="{ open: false, activeSection: 'home' }" class="relative">
+        <!-- Navigation -->
+        <nav class="bg-white/80 backdrop-blur-md shadow-sm fixed w-full z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                                A
+                            </div>
+                            <span class="ml-2 text-xl font-semibold text-gray-800">Aldi Herawan</span>
+                        </div>
+                    </div>
+                    <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+                        <a href="#home" @click="activeSection = 'home'" :class="{'text-green-600 border-b-2 border-green-600': activeSection === 'home'}" class="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium">Home</a>
+                        <a href="#about" @click="activeSection = 'about'" :class="{'text-green-600 border-b-2 border-green-600': activeSection === 'about'}" class="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium">About</a>
+                        <a href="#skills" @click="activeSection = 'skills'" :class="{'text-green-600 border-b-2 border-green-600': activeSection === 'skills'}" class="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium">Skills</a>
+                        <a href="#vision" @click="activeSection = 'vision'" :class="{'text-green-600 border-b-2 border-green-600': activeSection === 'vision'}" class="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium">Vision</a>
+                        <a href="#contact" @click="activeSection = 'contact'" :class="{'text-green-600 border-b-2 border-green-600': activeSection === 'contact'}" class="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium">Contact</a>
+                    </div>
+                    <div class="-mr-2 flex items-center md:hidden">
+                        <button @click="open = !open" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 focus:outline-none">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div x-show="open" @click.away="open = false" class="md:hidden absolute w-full bg-white shadow-lg">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#home" @click="open = false; activeSection = 'home'" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50">Home</a>
+                    <a href="#about" @click="open = false; activeSection = 'about'" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50">About</a>
+                    <a href="#skills" @click="open = false; activeSection = 'skills'" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50">Skills</a>
+                    <a href="#vision" @click="open = false; activeSection = 'vision'" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50">Vision</a>
+                    <a href="#contact" @click="open = false; activeSection = 'contact'" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50">Contact</a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Hero Section -->
+        <section id="home" class="pt-24 pb-16 md:pt-32 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+                        Bridging <span class="text-green-600">Agriculture</span> with <span class="text-blue-600">Technology</span>
+                    </h1>
+                    <p class="text-lg text-gray-600">
+                        I'm Aldi Herawan, a digital enthusiast focused on web development, interactive interfaces, and cybersecurity with a foundation in modern agribusiness.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#contact" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition duration-300 shadow-md hover:shadow-lg">
+                            Contact Me
+                        </a>
+                        <a href="#about" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition duration-300">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="canvas-container rounded-xl overflow-hidden shadow-xl">
+                        <canvas id="farmModel" class="farm-model"></canvas>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 bg-white p-4 rounded-lg shadow-lg">
+                        <div class="flex items-center space-x-2">
+                            <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                            <span class="text-sm font-medium">Smart Farm Model</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Floating elements -->
+            <div class="absolute top-1/4 left-10 w-16 h-16 rounded-full bg-blue-100 opacity-70 floating"></div>
+            <div class="absolute top-1/3 right-20 w-24 h-24 rounded-full bg-green-100 opacity-70 floating" style="animation-delay: 0.5s;"></div>
+            <div class="absolute bottom-1/4 left-1/4 w-20 h-20 rounded-full bg-purple-100 opacity-70 floating" style="animation-delay: 1s;"></div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-white rounded-2xl shadow-sm mt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">About Me</h2>
+                <div class="w-20 h-1 bg-green-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="col-span-2 space-y-6">
+                    <p class="text-gray-600">
+                        Halo, saya Aldi Herawan, seorang digital enthusiast yang berfokus pada pengembangan teknologi web, antarmuka interaktif, dan keamanan siber. Saya memiliki dasar pemahaman dalam agribisnis modern, yang menginspirasi saya untuk menjembatani dunia pertanian dan teknologi dengan pendekatan yang lebih efisien dan terotomatisasi.
+                    </p>
+                    <p class="text-gray-600">
+                        Dengan kombinasi minat pada dunia kreatif, keterampilan teknis, dan kepekaan terhadap solusi masa depan, saya sedang membentuk jalur karier yang unik di persimpangan antara front-end development, AI assistant systems, dan white hat cybersecurity.
+                    </p>
+                    <p class="text-gray-600">
+                        Saya percaya bahwa teknologi seharusnya bukan hanya inovatif, tetapi juga inklusif dan solutif. Maka dari itu, setiap proyek yang saya kerjakan bertujuan menghadirkan nilai—bukan sekadar tampilan.
+                    </p>
+                    
+                    <div class="mt-8 grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-green-100 rounded-full text-green-600">
+                                    <i class="fas fa-code text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 font-medium text-gray-800">Web Development</h3>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                                    <i class="fas fa-shield-alt text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 font-medium text-gray-800">Cybersecurity</h3>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-purple-100 rounded-full text-purple-600">
+                                    <i class="fas fa-leaf text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 font-medium text-gray-800">AgriTech</h3>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-yellow-100 rounded-full text-yellow-600">
+                                    <i class="fas fa-brain text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 font-medium text-gray-800">AI Systems</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="bg-gray-50 rounded-xl p-6 h-full flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Tech + Agriculture</h3>
+                            <p class="text-gray-600 mb-6">
+                                My unique perspective combines technical skills with agricultural knowledge to create innovative solutions for modern farming challenges.
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                                        <i class="fas fa-tractor"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-800">Smart Farming</h4>
+                                        <p class="text-xs text-gray-500">Automated solutions</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-800">Data Analytics</h4>
+                                        <p class="text-xs text-gray-500">Farm optimization</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-800">AI Integration</h4>
+                                        <p class="text-xs text-gray-500">Predictive systems</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <div class="relative h-48 w-full rounded-lg overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-br from-green-400 to-blue-500 opacity-80"></div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center p-4">
+                                        <h3 class="text-white font-bold text-xl">Innovation in Agriculture</h3>
+                                        <p class="text-white text-sm mt-2">Bridging technology with traditional farming</p>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-4 right-4">
+                                    <div class="h-12 w-12 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+                                        <i class="fas fa-seedling text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">My Skills</h2>
+                <div class="w-20 h-1 bg-green-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Web Development</h3>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">HTML5/CSS3</span>
+                                <span class="text-sm font-medium text-gray-500">80%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">JavaScript</span>
+                                <span class="text-sm font-medium text-gray-500">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Tailwind CSS</span>
+                                <span class="text-sm font-medium text-gray-500">75%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 75%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Vue.js/Alpine.js</span>
+                                <span class="text-sm font-medium text-gray-500">60%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">UI/UX Design</span>
+                                <span class="text-sm font-medium text-gray-500">65%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Cybersecurity & Systems</h3>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Cybersecurity Basics</span>
+                                <span class="text-sm font-medium text-gray-500">60%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">PHP</span>
+                                <span class="text-sm font-medium text-gray-500">65%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Python</span>
+                                <span class="text-sm font-medium text-gray-500">65%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Termux & Linux CLI</span>
+                                <span class="text-sm font-medium text-gray-500">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">System Simulation</span>
+                                <span class="text-sm font-medium text-gray-500">60%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-white rounded-xl shadow-sm p-6 card-hover">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Tools & Soft Skills</h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <i class="fab fa-git-alt text-green-600"></i>
+                        </div>
+                        <span class="text-sm font-medium">Git & GitHub</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i class="fab fa-figma text-blue-600"></i>
+                        </div>
+                        <span class="text-sm font-medium">Figma</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <i class="fas fa-lightbulb text-purple-600"></i>
+                        </div>
+                        <span class="text-sm font-medium">Problem Solving</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                        <div class="p-2 bg-yellow-100 rounded-lg">
+                            <i class="fas fa-comments text-yellow-600"></i>
+                        </div>
+                        <span class="text-sm font-medium">Communication</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Vision Section -->
+        <section id="vision" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-white rounded-2xl shadow-sm mt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">My Vision</h2>
+                <div class="w-20 h-1 bg-green-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <div class="relative h-64 w-full rounded-xl overflow-hidden mb-6">
+                        <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 opacity-80"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center p-6">
+                                <h3 class="text-white font-bold text-2xl">Technology for Agriculture</h3>
+                                <p class="text-white mt-2">Innovative solutions for modern farming challenges</p>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 h-16 w-16 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center rotate">
+                            <i class="fas fa-cogs text-white text-xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-green-100 rounded-full text-green-600">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="font-medium text-gray-800">Automation</h4>
+                                    <p class="text-xs text-gray-500">Smart farming systems</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg card-hover">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="font-medium text-gray-800">Security</h4>
+                                    <p class="text-xs text-gray-500">Protected systems</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <p class="text-gray-600">
+                        Saya ingin menjadi bagian dari perubahan—mengintegrasikan teknologi cerdas ke dalam kehidupan sehari-hari dan industri yang belum banyak disentuh oleh digitalisasi, termasuk agribisnis. Saya percaya pada kekuatan teknologi yang manusiawi: yang tidak hanya efisien, tetapi juga bisa menjangkau, membantu, dan menyelesaikan masalah nyata.
+                    </p>
+                    <p class="text-gray-600">
+                        Setiap langkah kecil dalam coding, desain, dan eksperimen saya adalah bagian dari misi besar: membawa solusi, bukan hanya fitur.
+                    </p>
+                    
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-quote-left text-green-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    "Technology should solve real problems, not just create new features."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4 pt-4">
+                        <div class="p-3 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-leaf text-green-500 text-xl"></i>
+                        </div>
+                        <div class="p-3 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-laptop-code text-blue-500 text-xl"></i>
+                        </div>
+                        <div class="p-3 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-user-shield text-purple-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">Get In Touch</h2>
+                <div class="w-20 h-1 bg-green-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-sm p-8 card-hover">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Contact Information</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-800">Email</h4>
+                                <p class="text-sm text-gray-500">aldiherawan666@gmail.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-800">Phone/WhatsApp</h4>
+                                <p class="text-sm text-gray-500">+62 822-5032-9091</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Find Me On</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="https://www.tiktok.com/@hhhhhalldi?_t=ZS-8wAwLwlJHxh&_r=1" target="_blank" class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="p-2 bg-black rounded-lg">
+                                    <i class="fab fa-tiktok text-white"></i>
+                                </div>
+                                <span class="text-sm font-medium">TikTok</span>
+                            </a>
+                            
+                            <a href="https://www.instagram.com/alhz.15?igsh=YzljYTk1ODg3Zg==" target="_blank" class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="p-2 bg-pink-600 rounded-lg">
+                                    <i class="fab fa-instagram text-white"></i>
+                                </div>
+                                <span class="text-sm font-medium">Instagram</span>
+                            </a>
+                            
+                            <a href="https://x.com/AldiCihuy264154" target="_blank" class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="p-2 bg-black rounded-lg">
+                                    <i class="fab fa-twitter text-white"></i>
+                                </div>
+                                <span class="text-sm font-medium">Twitter/X</span>
+                            </a>
+                            
+                            <a href="https://id.linkedin.com/" target="_blank" class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="p-2 bg-blue-700 rounded-lg">
+                                    <i class="fab fa-linkedin-in text-white"></i>
+                                </div>
+                                <span class="text-sm font-medium">LinkedIn</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-8 card-hover">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Send Me a Message</h3>
+                    
+                    <form class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-3 border">
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-3 border">
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-3 border"></textarea>
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition">
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mt-12 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
+                        AH
+                    </div>
+                    <span class="ml-2 text-lg font-semibold text-gray-800">Aldi Herawan</span>
+                </div>
+                
+                <div class="mt-4 md:mt-0">
+                    <p class="text-sm text-gray-500">
+                        &copy; 2025 Aldi Herawan. All rights reserved.
+                    </p>
+                </div>
+                
+                <div class="mt-4 md:mt-0 flex space-x-4">
+                    <a href="https://www.tiktok.com/@hhhhhalldi?_t=ZS-8wAwLwlJHxh&_r=1" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="https://www.instagram.com/alhz.15?igsh=YzljYTk1ODg3Zg==" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://x.com/AldiCihuy264154" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://id.linkedin.com/" target="_blank" class="text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // 3D Farm Model
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Three.js scene
+            const canvas = document.getElementById('farmModel');
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setClearColor(0xf8fafc, 1);
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            
+            const controls = new THREE.OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+            
+            // Create farm elements
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8bc34a,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Add crops
+            const cropGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 6);
+            const cropMaterial = new THREE.MeshStandardMaterial({ color: 0x4caf50 });
+            
+            for (let i = 0; i < 20; i++) {
+                const crop = new THREE.Mesh(cropGeometry, cropMaterial);
+                crop.position.x = (Math.random() - 0.5) * 15;
+                crop.position.z = (Math.random() - 0.5) * 15;
+                crop.position.y = 0.5;
+                crop.rotation.y = Math.random() * Math.PI;
+                scene.add(crop);
+            }
+            
+            // Add greenhouse
+            const greenhouseGeometry = new THREE.BoxGeometry(4, 3, 6);
+            const greenhouseMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                transmission: 0.9,
+                roughness: 0.1,
+                metalness: 0.0,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1
+            });
+            const greenhouse = new THREE.Mesh(greenhouseGeometry, greenhouseMaterial);
+            greenhouse.position.set(0, 1.5, 0);
+            scene.add(greenhouse);
+            
+            // Add frame to greenhouse
+            const frameGeometry = new THREE.BoxGeometry(4.1, 3.1, 6.1);
+            const frameMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x555555,
+                wireframe: true
+            });
+            const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+            frame.position.set(0, 1.5, 0);
+            scene.add(frame);
+            
+            // Add solar panel
+            const panelGeometry = new THREE.BoxGeometry(3, 0.1, 2);
+            const panelMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x333333,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel.position.set(5, 3, -5);
+            panel.rotation.y = Math.PI / 4;
+            scene.add(panel);
+            
+            // Add support for panel
+            const supportGeometry = new THREE.CylinderGeometry(0.05, 0.05, 3, 8);
+            const supportMaterial = new THREE.MeshStandardMaterial({ color: 0x777777 });
+            const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+            support1.position.set(4, 1.5, -4);
+            scene.add(support1);
+            
+            const support2 = new THREE.Mesh(supportGeometry, supportMaterial);
+            support2.position.set(6, 1.5, -6);
+            scene.add(support2);
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate crops slightly
+                scene.children.forEach(child => {
+                    if (child.geometry === cropGeometry) {
+                        child.rotation.y += 0.01;
+                    }
+                });
+                
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+            
+            animate();
+            
+            // Animate skill bars on scroll
+            const skillBars = document.querySelectorAll('.skill-progress');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const width = entry.target.style.width;
+                        entry.target.style.width = '0%';
+                        setTimeout(() => {
+                            entry.target.style.width = width;
+                        }, 100);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            skillBars.forEach(bar => {
+                observer.observe(bar);
+            });
+        });
+    </script>
+</body>
+</html>
